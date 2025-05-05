@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    <title>Register</title>
+</head>
+<body>
+    <div class="form-container">
+        <div class="center">
+            <h2>Register</h2>
+            <form action="/register" method="POST">
+                <div class="txt_field">
+                    <label>Username</label>
+                    <input type="text" placeholder="Username" name="username" required>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <label>Email</label>
+                    <input type="email" placeholder="Email" name="email" required>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <label>Password</label>
+                    <input type="password" placeholder="Password" name="password" required>
+                    <span></span>
+                </div>
+                <div class="pass">Forget Password?</div>
+                <button type="submit" class="cta-button">Register</button>
+                <div class="register_link">
+                    Already have an account ? <a href="login.html">Login</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</body>
+</html>

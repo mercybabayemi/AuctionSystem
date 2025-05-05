@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    <title>Auction Homepage</title>
+</head>
+<body>
+    <div class="headerdiv">
+        <header>
+        <nav>
+            <div class = 'allfirstin'>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='images/auction-com-logo-hd-png-download.png') }}" alt="Auction Logo">
+                </div>
+                <div class="navigator">
+                    <ul class="nav-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#aboutus">About us</a></li>
+                        <li><a href="#contactus">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class ='register'>
+                <a href="#register" class="cta-button">Get Started</a>
+            </div>
+        </nav>
+    </header>
+        </div>
+    </div>
+
+    <section class="hero">
+        <h1>Welcome to Our Auction Platform</h1>
+        <p>Bid on your favorite items and discover amazing deals!</p>
+        <a href="#features" class="cta-button">Explore Now</a>
+    </section>
+
+    <section id="features" class="features">
+        <h2>Features</h2>
+        <div class="feature">
+            <h3>Login</h3>
+            <p>Access your account and manage your bids.</p>
+        </div>
+        <div class="feature">
+            <h3>Register</h3>
+            <p>Create an account to start bidding today!</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Auction Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>
