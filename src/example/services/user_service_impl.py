@@ -1,5 +1,6 @@
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from example.models.user import User
 from src.example.models.auction import Auction
 from src.example.repositories.user_repository_impl import UserRepositoryImpl
 from src.example.schemas.user_schema import UserSchema
@@ -11,7 +12,8 @@ class UserServiceImpl(UserService):
     @staticmethod
     def register_user(user_data):
         user_schema = UserSchema()
-        user = user_schema.load(user_data)
+        validated_data = user_schema.load(user_data)
+        user = User(**validated_data)
         user.password = generate_password_hash(user.password)
         UserRepositoryImpl.save_user(user)
 

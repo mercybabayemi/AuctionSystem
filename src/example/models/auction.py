@@ -10,6 +10,7 @@ class Auction(Document):
     bids = ListField(ReferenceField('Bid'), default=list)
     item_description = StringField(required=True)
     item_title = StringField(required=True)
+    image_filename = StringField()  # Stores the name of the uploaded image file
     start_time = DateTimeField(default=datetime.utcnow)
     end_time = DateTimeField()
     is_approved = BooleanField(default=False)
@@ -22,6 +23,7 @@ class Auction(Document):
             'bids': self.bids,
             'item_description': self.item_description,
             'item_title': self.item_title,
+            'image_filename': self.image_filename,
             'start_time': self.start_time.isoformat() if self.start_time else None,
             'end_time': self.end_time,
             'is_approved': self.is_approved

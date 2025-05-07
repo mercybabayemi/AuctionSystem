@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/login.css">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
-    <title>Login</title>
+    <title>Auction System - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 <body>
-    <div class="form-container">
-        <div class="center">
-            <h2>Login</h2>
-            <form action="/login" method="POST">
-                <div class="txt_field">
-                    <label>Username</label>
-                    <input type="text" placeholder="Username" name="username" required>
-                    <span></span>
-                </div>
-                <div class="txt_field">
-                    <label>Password</label>
-                    <input type="password" placeholder="Password" name="password" required>
-                    <span></span>
-                </div>
-                <div class="pass">Forget Password?</div>
-                <button type="submit" class="cta-button">Login</button>
-                <div class="register_link">
-                    Not a Member ? <a href="register.html">Register</a>
-                </div>
-            </form>
-
-        </div>
-    </div>
+    <header>
+        <h1>Login</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <form action="{{ url_for('login') }}" method="post">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+    </main>
+    <footer>
+        <p>&copy; 2025 Auction System</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

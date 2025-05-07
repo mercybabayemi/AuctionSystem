@@ -1,6 +1,4 @@
 from flask import Blueprint, request, jsonify, render_template, current_app
-from flask_jwt_extended import get_current_user, jwt_required, get_jwt_identity
-from jwt import PyJWTError
 from werkzeug.exceptions import HTTPException
 
 from ..exceptions.auth_error import AuthError
@@ -9,7 +7,8 @@ from ..exceptions.is_not_admin_exception import IsNotAdmin
 from ..exceptions.validation_error import ValidationError
 from ..repositories.user_repository_impl import UserRepositoryImpl
 from ..services.user_service_impl import UserServiceImpl
-from ..utils.token_util import decode_token
+from ..utils.decorators import manual_jwt_required # Updated import
+from ..models.user import User # For type hinting or direct use if needed
 
 user_router = Blueprint('user', __name__, url_prefix='/api')
 user_service = UserServiceImpl()
@@ -62,42 +61,61 @@ def get_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
-@user_router.route('/user/<user_id>/block', methods=['POST'])
-def block_user(user_id):
+@user_router.route('/user/<target_user_id>/block', methods=['POST'])
+@manual_jwt_required
+def block_user(current_user_id, target_user_id):
     try:
-        user = get_current_user()
-        if not user.is_admin() or user.is_super_admin():
-            raise IsNotAdmin("Permission denied: Only admin can block users.")
-        user_service.block_user(user_id)
+        admin_user = UserRepositoryImpl.find_user_by_id(current_user_id)
+        if not admin_user:
+            return jsonify({"error": "Admin user performing action not found"}), 404
+
+        # Check if the admin_user has roles and then if they are an admin or super_admin
+        is_admin = admin_user.roles.get('is_admin', False) if hasattr(admin_user, 'roles') and admin_user.roles else False
+        is_super_admin = admin_user.roles.get('is_super_admin', False) if hasattr(admin_user, 'roles') and admin_user.roles else False
+
+        if not (is_admin or is_super_admin):
+            return jsonify({"error": "Permission denied: Only admin or super admin can block users."}), 403
+        
+        user_service.block_user(target_user_id) # user_service handles if target_user_id exists
         return jsonify({"message": "User blocked successfully."}), 200
+    except EntityNotFoundException as e: # Specific error if user to block isn't found by service
+        return jsonify({"error": str(e)}), 404
+    except IsNotAdmin as e: # If you have specific permission errors from service
+        return jsonify({"error": str(e)}), 403
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        current_app.logger.error(f"Error in block_user: {str(e)}")
+        return jsonify({"error": "An internal error occurred while blocking the user."}), 500
 
 @user_router.route('/create_admin', methods=['POST'])
-@jwt_required()
-def create_admin():
+@manual_jwt_required
+def create_admin(current_user_id):
     try:
-        # Get token from header manually (compatible with your system)
-        auth_header = request.headers.get('Authorization', '')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({"error": "Missing or invalid header"}), 401
+        # Fetch the user object for the authenticated user (who is trying to create an admin)
+        acting_user = UserRepositoryImpl.find_user_by_id(current_user_id)
+        if not acting_user:
+            # This case should ideally be caught by decode_token if user_id is stale,
+            # but as a safeguard if user is deleted after token generation / before this call.
+            return jsonify({"error": "Authenticated user not found in database."}), 404
 
-        token = auth_header.split()[1]
-        current_user_id = decode_token(token)  # Using your existing decode
+        # Check if the acting_user is a super_admin
+        is_super_admin = acting_user.roles.get('is_super_admin', False) if hasattr(acting_user, 'roles') and acting_user.roles else False
+        if not is_super_admin:
+            return jsonify({"error": "Permission denied: Only super_admin can create other admins."}), 403
 
-        # DEBUG: Print user ID and fetch full user
-        current_app.logger.debug(f"Attempting admin creation as user: {current_user_id}")
-        user = UserRepositoryImpl.find_user_by_id(current_user_id)
-
-        # DEBUG: Print user object and super admin status
-        current_app.logger.debug(f"User object: {user.to_dict() if user else None}")
-        current_app.logger.debug(f"Super admin status: {getattr(user, 'is_super_admin', None)}")
-        current_app.logger.debug(f"User data: {user.to_dict()}")
-        if not user:
-            return jsonify({"error": "User not found"}), 404
-
-        # PROPER Super admin check - looks in roles sub-document
-        is_super_admin = user.roles.get('is_super_admin', False) if hasattr(user, 'roles') else False
+        admin_data = request.get_json()
+        if not admin_data:
+            return jsonify({"error": "Invalid JSON data for new admin"}), 400
+        
+        # The user_service.create_admin_user method would handle the actual creation logic
+        # It should take the admin_data (e.g., username, password) for the new admin
+        new_admin = user_service.create_admin_user(admin_data)
+        return jsonify({"message": "Admin user created successfully", "user_id": str(new_admin.user_id)}), 201
+    
+    except ValidationError as e:
+        return jsonify({"error": str(e)}), 422
+    except Exception as e:
+        current_app.logger.error(f"Error in create_admin: {str(e)}")
+        return jsonify({"error": "An internal error occurred while creating admin user."}), 500
 
         if not is_super_admin:
             current_app.logger.warning(f"Admin creation denied for user {user.user_id}")

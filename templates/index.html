@@ -3,55 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
-    <title>Auction Homepage</title>
+    <title>AuctionBay - Your Premier Auction Destination</title> <!-- Engaging Title -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Consider adding a favicon link here -->
+    <!-- <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon"> -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script> <!-- If SocketIO is still actively used -->
 </head>
 <body>
-    <div class="headerdiv">
-        <header>
-        <nav>
-            <div class = 'allfirstin'>
-                <div class="logo">
-                    <img src="{{ url_for('static', filename='images/auction-com-logo-hd-png-download.png') }}" alt="Auction Logo">
-                </div>
-                <div class="navigator">
-                    <ul class="nav-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#aboutus">About us</a></li>
-                        <li><a href="#contactus">Contact Us</a></li>
-                    </ul>
-                </div>
+    <header class="site-header">
+        <div class="container header-content">
+            <div class="logo-area">
+                <!-- Replace with your actual logo image if you have one -->
+                <a href="{{ url_for('index') }}" class="logo-text">AuctionBay</a> 
+                <!-- Example: <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AuctionBay Logo" class="logo-image"> -->
             </div>
-
-            <div class ='register'>
-                <a href="#register" class="cta-button">Get Started</a>
-            </div>
-        </nav>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="#about">About Us</a></li> <!-- Link to a potential About section/page -->
+                    <li><a href="{{ url_for('view_auctions') if 'view_auctions' in endpoints else '#' }}">Auctions</a></li>
+                    <li><a href="#contact">Contact</a></li> <!-- Link to footer contact -->
+                    <li><a href="{{ url_for('login') }}" class="nav-button">Login</a></li>
+                    <li><a href="{{ url_for('register') }}" class="nav-button-secondary">Register</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
-        </div>
-    </div>
 
-    <section class="hero">
-        <h1>Welcome to Our Auction Platform</h1>
-        <p>Bid on your favorite items and discover amazing deals!</p>
-        <a href="#features" class="cta-button">Explore Now</a>
-    </section>
+    <main class="container">
+        <section class="hero-section">
+            <h2>Discover Unique Items & Exciting Bids</h2>
+            <p>Join thousands of users in the ultimate online auction experience. Find treasures, sell your items, and win big!</p>
+            <a href="{{ url_for('view_auctions') if 'view_auctions' in endpoints else '#' }}" class="cta-button">View All Auctions</a>
+        </section>
 
-    <section id="features" class="features">
-        <h2>Features</h2>
-        <div class="feature">
-            <h3>Login</h3>
-            <p>Access your account and manage your bids.</p>
+        <h2 class="section-title">Live Auctions</h2>
+        <div class="auction-listings">
+            {% if auctions %}
+                {% for auction in auctions %}
+                <div class="auction-item" data-auction-id="{{ auction.item_id or auction.id }}"> <!-- Ensure you use the correct ID field -->
+                    <div class="auction-item-image-container">
+                         <img src="{{ auction.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ auction.title }}" class="auction-image">
+                    </div>
+                    <div class="auction-item-content">
+                        <h3>{{ auction.title }}</h3>
+                        <p class="auction-description">{{ auction.description | truncate(80) }}</p> <!-- Short description -->
+                        <p class="starting-bid">Starting Bid: ${{ "%.2f"|format(auction.starting_bid) }}</p>
+                        <p class="current-bid">Current Bid: <strong>${{ "%.2f"|format(auction.current_bid) }}</strong></p>
+                        <p class="time-left">Time Left: <span class="time-dynamic">{{ auction.time_left }}</span></p>
+                        <a href="{{ url_for('auction_detail', item_id=(auction.item_id or auction.id)) if 'auction_detail' in endpoints else '#' }}" class="bid-button">View & Bid</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-auctions-message">No auctions available at the moment. Why not <a href="{{ url_for('create_auction_form') if 'create_auction_form' in endpoints else '#' }}">list your own item</a>?</p>
+            {% endif %}
         </div>
-        <div class="feature">
-            <h3>Register</h3>
-            <p>Create an account to start bidding today!</p>
-        </div>
-    </section>
+    </main>
 
-    <footer>
-        <p>&copy; 2025 Auction Platform. All rights reserved.</p>
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-section about-us">
+                <h4>About AuctionBay</h4>
+                <p>AuctionBay is your premier online platform for discovering unique items and engaging in exciting bidding wars. Join our community today!</p>
+            </div>
+            <div class="footer-section contact-info">
+                <h4>Contact Us</h4>
+                <p>Email: <a href="mailto:support@auctionbay.example.com">support@auctionbay.example.com</a></p>
+                <p>Phone: +1 (555) 123-4567</p>
+                <p>Address: 123 Auction Lane, Bidville, USA</p>
+            </div>
+            <div class="footer-section quick-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="{{ url_for('terms') if 'terms' in endpoints else '#' }}">Terms of Service</a></li>
+                    <li><a href="{{ url_for('privacy') if 'privacy' in endpoints else '#' }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright-bar">
+            <p>&copy; {{ "now"|date("%Y") }} AuctionBay. All Rights Reserved.</p> <!-- Dynamic year -->
+        </div>
     </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
