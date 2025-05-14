@@ -7,7 +7,7 @@ import os
 from ..utils.decorators import manual_jwt_required 
 from ..services.auction_service_impl import AuctionServiceImpl
 from ..schemas.auction_schema import AuctionSchema
-from ..config import Config
+from src.config import Config
 from ..models.user import User # For fetching user if needed, though id is often enough
 from ..repositories.user_repository_impl import UserRepositoryImpl # To fetch user object
 from ..exceptions.entity_not_found_exception import EntityNotFoundException

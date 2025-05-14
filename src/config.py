@@ -5,4 +5,6 @@ class Config:
     JWT_EXPIRATION_SECONDS = 3600  # 1 hour
     JWT_TOKEN_LOCATION = ['headers']
     JWT_HEADER_NAME = 'Authorization'
-    JWT_HEADER_TYPE = \'Bearer\'\n    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), \'..\/static/uploads/auction_images\')\n    ALLOWED_EXTENSIONS = {\'png\', \'jpg\', \'jpeg\', \'gif\'}
+    JWT_HEADER_TYPE = 'Bearer'
+    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../static/uploads/auction_images')
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

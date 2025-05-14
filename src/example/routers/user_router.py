@@ -9,6 +9,7 @@ from ..repositories.user_repository_impl import UserRepositoryImpl
 from ..services.user_service_impl import UserServiceImpl
 from ..utils.decorators import manual_jwt_required # Updated import
 from ..models.user import User # For type hinting or direct use if needed
+from ..utils.token_util import decode_token
 
 user_router = Blueprint('user', __name__, url_prefix='/api')
 user_service = UserServiceImpl()
@@ -102,25 +103,6 @@ def create_admin(current_user_id):
         if not is_super_admin:
             return jsonify({"error": "Permission denied: Only super_admin can create other admins."}), 403
 
-        admin_data = request.get_json()
-        if not admin_data:
-            return jsonify({"error": "Invalid JSON data for new admin"}), 400
-        
-        # The user_service.create_admin_user method would handle the actual creation logic
-        # It should take the admin_data (e.g., username, password) for the new admin
-        new_admin = user_service.create_admin_user(admin_data)
-        return jsonify({"message": "Admin user created successfully", "user_id": str(new_admin.user_id)}), 201
-    
-    except ValidationError as e:
-        return jsonify({"error": str(e)}), 422
-    except Exception as e:
-        current_app.logger.error(f"Error in create_admin: {str(e)}")
-        return jsonify({"error": "An internal error occurred while creating admin user."}), 500
-
-        if not is_super_admin:
-            current_app.logger.warning(f"Admin creation denied for user {user.user_id}")
-            return jsonify({"error": "Super admin privileges required"}), 403
-
         # Process request
         admin_data = request.get_json()
         UserServiceImpl.create_admin_account(admin_data)
@@ -140,7 +122,7 @@ def create_admin(current_user_id):
 
  
 @user_router.route('/auction_report', methods=['GET'])
-@jwt_required()
+@manual_jwt_required
 def generate_auction_report():
     try:
         # Get token from header manually (compatible with your system)
@@ -180,7 +162,7 @@ def generate_auction_report():
         return jsonify({"error": str(e)}), 500
 
 @user_router.route('/logout', methods=['POST'])
-@jwt_required()
+@manual_jwt_required
 def logout():
     try:
         # Get token from header manually (compatible with your system)
@@ -206,7 +188,7 @@ def logout():
         return jsonify({"error": str(e)}), 400
 
 @user_router.route('/users/<user_id>', methods=['DELETE'])
-@jwt_required()
+@manual_jwt_required
 def delete_user(user_id):
     try:
         # Get token from header manually (compatible with your system)

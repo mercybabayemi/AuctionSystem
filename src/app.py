@@ -1,7 +1,9 @@
 from flask import Flask, render_template, url_for
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from mongoengine import connect
 from config import Config
+from example.services.auction_service_impl import AuctionServiceImpl
 from src.example.routers.user_router import user_router
 from src.example.routers.auction_router import auction_router
 # AuctionServiceImpl is imported by auction_router, no need to import here if not directly used
@@ -11,6 +13,7 @@ from src.example.routers.auction_router import auction_router
 from .extensions import socketio
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(Config)
 
 # Initialize extensions
